@@ -13,7 +13,8 @@ Tool-manager-snapshot users the configuration file careated by the AWS cli e.g.
 
 ## Running
 
-'pipenv run python snapmanager/snapmanager.py <command> <--project = PROJECT>'
+'pipenv run python snapmanager/snapmanager.py <command> <subcommand> <--project = PROJECT>'
 
-*command* is list, start , or stop
+*command* is   instances , volumes or snapshots
+*subcommand* depends on the command;  list, start , or stop 
 * project is optional

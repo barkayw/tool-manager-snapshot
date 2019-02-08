@@ -7,19 +7,93 @@ ec2 = session.resource('ec2')
 def filter_instances(project):
 
     instances = []
-
     if project:
         filters = [{'Name':'tag:project' , 'Values':[project]}]
         instances = ec2.instances.filter(Filters=filters)
     else:
         instances = ec2.instances.all()
-
     return instances
 
 
 @click.group()
+def cli():
+    """Tool-manager-snapshot mamag snapshots"""
+
+@cli.group('snapshots')
+def snapshots():
+    """ Commands for snapshots"""
+
+@snapshots.command('list')
+
+@click.option('--project', default=None,
+        help="Only volumes for the progect(tag Progect:<name>)")
+def list_volumes(project):
+    "List EC2 snapshots"
+
+    instances = filter_instances(project)
+
+    for i in instances:
+        for v in i.volumes.all():
+            for s in v.snapshots.all():
+                print(", ".join((
+                    s.id,
+                    v.id,
+                    i.id,
+                    s.state,
+                    s.progress,
+                    s.start_time.strftime("%c")
+                )))
+    return
+
+
+@cli.group('volumes')
+def volumes():
+    """ Commands for volumes"""
+
+@volumes.command('list')
+@click.option('--project', default=None,
+        help="Only volumes for the progect(tag Progect:<name>)")
+def list_volumes(project):
+    "List EC2 volumes"
+
+    instances = filter_instances(project)
+
+    for i in instances:
+        for v in i.volumes.all():
+            print(", ".join((
+                v.id,
+                i.id,
+                v.state,
+                str(v.size) + "GiB",
+                v.encrypted and "Encrypted" or "Not Encrypted"
+            )))
+
+    return
+
+@cli.group('instances')
 def instances():
         """Commands for instence"""
+
+@instances.command('snapshot',
+        help="Criate snapshot for all volumes")
+@click.option('--project', default=None,
+        help="Only instances for the progect(tag Progect:<name>)")
+
+def create_snapshots(project):
+            "Create snapshot for EC2 instances"
+
+            instances = filter_instances(project)
+
+            for v in i.volumes.all():
+                print('create snapshot fo {0}'.format(v.id))
+
+                v.create_snapshot(Description="Created by Snapshot Script")
+
+            return
+
+
+
+
 
 @instances.command('list')
 @click.option('--project', default=None,
@@ -70,4 +144,4 @@ def start_instances(project):
     return
 
 if __name__ == '__main__':
-    instances()
+    cli()
