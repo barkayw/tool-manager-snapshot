@@ -72,27 +72,24 @@ def list_volumes(project):
 
 @cli.group('instances')
 def instances():
-        """Commands for instence"""
+        """Commands for instences"""
 
 @instances.command('snapshot',
-        help="Criate snapshot for all volumes")
+        help="Criate snapshots for all volumes")
 @click.option('--project', default=None,
         help="Only instances for the progect(tag Progect:<name>)")
 
 def create_snapshots(project):
-            "Create snapshot for EC2 instances"
+    "Create snapshot for EC2 instances"
 
-            instances = filter_instances(project)
+    instances = filter_instances(project)
 
-            for v in i.volumes.all():
-                print('create snapshot fo {0}'.format(v.id))
+    for i in instances:
+        for v in i.volumes.all():
+            print('create snapshot fo {0}'.format(v.id))
+            v.create_snapshot(Description="Created by Snapshot Script")
 
-                v.create_snapshot(Description="Created by Snapshot Script")
-
-            return
-
-
-
+    return
 
 
 @instances.command('list')
